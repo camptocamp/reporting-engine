@@ -13,8 +13,25 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 
+class BaseModel(models.AbstractModel):
+    _inherit = 'base'
+
+    @api.model_cr_context
+    def _auto_init(self):
+        if self._name.startswith(BiSQLView._model_prefix):
+            self._auto = False
+        return super(BaseModel, self)._auto_init()
+
+    @api.model_cr_context
+    def _auto_end(self):
+        if self._name.startswith(BiSQLView._model_prefix):
+            self._foreign_keys = set()
+        return super(BaseModel, self)._auto_end()
+
+
 class BiSQLView(models.Model):
     _name = 'bi.sql.view'
+    _order = 'sequence'
     _inherit = ['sql.request.mixin']
 
     _sql_prefix = 'x_bi_sql_view_'
@@ -48,7 +65,10 @@ class BiSQLView(models.Model):
 
     is_materialized = fields.Boolean(
         string='Is Materialized View', default=True, readonly=True,
-        states={'draft': [('readonly', False)]})
+        states={
+            'draft': [('readonly', False)],
+            'sql_valid': [('readonly', False)],
+        })
 
     materialized_text = fields.Char(
         compute='_compute_materialized_text', store=True)
@@ -78,13 +98,17 @@ class BiSQLView(models.Model):
         "FROM my_table")
 
     domain_force = fields.Text(
-        string='Extra Rule Definition', default="[]", help="Define here"
-        " access restriction to data.\n"
+        string='Extra Rule Definition', default="[]", readonly=True,
+        help="Define here access restriction to data.\n"
         " Take care to use field name prefixed by 'x_'."
         " A global 'ir.rule' will be created."
         " A typical Multi Company rule is for exemple \n"
         " ['|', ('x_company_id','child_of', [user.company_id.id]),"
-        "('x_company_id','=',False)].")
+        "('x_company_id','=',False)].",
+        states={
+            'draft': [('readonly', False)],
+            'sql_valid': [('readonly', False)],
+        })
 
     has_group_changed = fields.Boolean(copy=False)
 
@@ -120,6 +144,23 @@ class BiSQLView(models.Model):
 
     rule_id = fields.Many2one(
         string='Odoo Rule', comodel_name='ir.rule', readonly=True)
+
+    group_ids = fields.Many2many(
+        comodel_name='res.groups', readonly=True, states={
+            'draft': [('readonly', False)],
+            'sql_valid': [('readonly', False)],
+        })
+
+    sequence = fields.Integer(string='sequence')
+
+    # Constrains Section
+    @api.constrains('is_materialized')
+    @api.multi
+    def _check_index_materialized(self):
+        for rec in self.filtered(lambda x: not x.is_materialized):
+            if rec.bi_sql_view_field_ids.filtered(lambda x: x.is_index):
+                raise UserError(_(
+                    'You can not create indexes on non materialized views'))
 
     @api.constrains('view_order')
     @api.multi
@@ -160,11 +201,16 @@ class BiSQLView(models.Model):
 
     # Overload Section
     @api.multi
+    def write(self, vals):
+        res = super(BiSQLView, self).write(vals)
+        if vals.get('sequence', False):
+            for rec in self.filtered(lambda x: x.menu_id):
+                rec.menu_id.sequence = rec.sequence
+        return res
+
+    @api.multi
     def unlink(self):
-        non_draft_views = self.search([
-            ('id', 'in', self.ids),
-            ('state', 'not in', ('draft', 'sql_valid'))])
-        if non_draft_views:
+        if any(view.state not in ('draft', 'sql_valid') for view in self):
             raise UserError(_("You can only unlink draft views"))
         return super(BiSQLView, self).unlink()
 
@@ -201,6 +247,15 @@ class BiSQLView(models.Model):
     @api.multi
     def button_set_draft(self):
         for sql_view in self:
+            sql_view.menu_id.unlink()
+            sql_view.action_id.unlink()
+            sql_view.tree_view_id.unlink()
+            sql_view.graph_view_id.unlink()
+            sql_view.pivot_view_id.unlink()
+            sql_view.search_view_id.unlink()
+            if sql_view.cron_id:
+                sql_view.cron_id.unlink()
+
             if sql_view.state in ('model_valid', 'ui_valid'):
                 # Drop SQL View (and indexes by cascade)
                 if sql_view.is_materialized:
@@ -209,14 +264,6 @@ class BiSQLView(models.Model):
                 # Drop ORM
                 sql_view._drop_model_and_fields()
 
-            sql_view.tree_view_id.unlink()
-            sql_view.graph_view_id.unlink()
-            sql_view.pivot_view_id.unlink()
-            sql_view.search_view_id.unlink()
-            sql_view.action_id.unlink()
-            sql_view.menu_id.unlink()
-            if sql_view.cron_id:
-                sql_view.cron_id.unlink()
             sql_view.write({'state': 'draft', 'has_group_changed': False})
 
     @api.multi
@@ -293,7 +340,8 @@ class BiSQLView(models.Model):
             'name': _('Refresh Materialized View %s') % (self.view_name),
             'user_id': SUPERUSER_ID,
             'model': 'bi.sql.view',
-            'function': 'button_refresh_materialized_view',
+            'function': '_refresh_materialized_view_cron',
+            'numbercall': -1,
             'args': repr(([self.id],))
         }
 
@@ -384,7 +432,7 @@ class BiSQLView(models.Model):
         else:
             view_id = self.graph_view_id.id
         return {
-            'name': self.name,
+            'name': self._prepare_action_name(),
             'res_model': self.model_id.model,
             'type': 'ir.actions.act_window',
             'view_mode': view_mode,
@@ -393,12 +441,22 @@ class BiSQLView(models.Model):
         }
 
     @api.multi
+    def _prepare_action_name(self):
+        self.ensure_one()
+        if not self.is_materialized:
+            return self.name
+        return "%s (%s)" % (
+            self.name,
+            datetime.utcnow().strftime(_("%m/%d/%Y %H:%M:%S UTC")))
+
+    @api.multi
     def _prepare_menu(self):
         self.ensure_one()
         return {
             'name': self.name,
             'parent_id': self.env.ref('bi_sql_editor.menu_bi_sql_editor').id,
             'action': 'ir.actions.act_window,%s' % (self.action_id.id),
+            'sequence': self.sequence,
         }
 
     # Custom Section
@@ -447,7 +505,7 @@ class BiSQLView(models.Model):
                 self._prepare_rule()).id
             # Drop table, created by the ORM
             req = "DROP TABLE %s" % (sql_view.view_name)
-            self.env.cr.execute(req)
+            self._log_execute(req)
 
     @api.multi
     def _create_model_access(self):
@@ -467,7 +525,7 @@ class BiSQLView(models.Model):
             if sql_view.rule_id:
                 sql_view.rule_id.unlink()
             if sql_view.model_id:
-                sql_view.model_id.unlink()
+                sql_view.model_id.with_context(_force_unlink=True).unlink()
 
     @api.multi
     def _hook_executed_request(self):
@@ -481,7 +539,7 @@ class BiSQLView(models.Model):
             AND     NOT attisdropped
             AND     attnum > 0
             ORDER   BY attnum;""" % (self.view_name)
-        self.env.cr.execute(req)
+        self._log_execute(req)
         return self.env.cr.fetchall()
 
     @api.multi
@@ -548,25 +606,33 @@ class BiSQLView(models.Model):
 
         return columns
 
+    @api.model
+    def _refresh_materialized_view_cron(self, view_ids):
+        sql_views = self.browse(view_ids)
+        return sql_views._refresh_materialized_view()
+
     @api.multi
     def _refresh_materialized_view(self):
-        for sql_view in self:
-            if sql_view.is_materialized:
-                req = "REFRESH %s VIEW %s" % (
-                    sql_view.materialized_text, sql_view.view_name)
-                self._log_execute(req)
-                sql_view._refresh_size()
-                if sql_view.action_id:
-                    # Alter name of the action, to display last refresh
-                    # datetime of the materialized view
-                    sql_view.action_id.name = "%s (%s)" % (
-                        self.name,
-                        datetime.utcnow().strftime(_("%m/%d/%Y %H:%M:%S UTC")))
+        for sql_view in self.filtered(lambda x: x.is_materialized):
+            req = "REFRESH %s VIEW %s" % (
+                sql_view.materialized_text, sql_view.view_name)
+            self._log_execute(req)
+            sql_view._refresh_size()
+            if sql_view.action_id:
+                # Alter name of the action, to display last refresh
+                # datetime of the materialized view
+                sql_view.action_id.name = sql_view._prepare_action_name()
 
     @api.multi
     def _refresh_size(self):
         for sql_view in self:
             req = "SELECT pg_size_pretty(pg_total_relation_size('%s'));" % (
                 sql_view.view_name)
-            self.env.cr.execute(req)
+            self._log_execute(req)
             sql_view.size = self.env.cr.fetchone()[0]
+
+    @api.multi
+    def button_preview_sql_expression(self):
+        self.button_validate_sql_expression()
+        res = self._execute_sql_request()
+        raise UserError('\n'.join(map(lambda x: str(x), res[:100])))
