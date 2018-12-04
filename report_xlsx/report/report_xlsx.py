@@ -31,15 +31,15 @@ class ReportXlsxAbstract(models.AbstractModel):
         :param ids: list of integers, provided by overrides.
         :return: recordset of active model for ids.
         """
+        ctx = self.env.context.copy()
         if docids:
             ids = docids
         elif data and 'context' in data:
             ids = data["context"].get('active_ids', [])
+            ctx.update(data.get('context', {}))
         else:
             ids = self.env.context.get('active_ids', [])
         # propagate context anyway
-        ctx = self.env.context.copy()
-        ctx.update(data.get('context', {}))
         # let it fail explicitely if `active_model` is not there
         return self.env[ctx['active_model']].with_context(**ctx).browse(ids)
 
