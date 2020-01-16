@@ -11,8 +11,9 @@
     "license": "AGPL-3",
     "depends": ["web", "base"],
     "data": [
-        "views/report_templates.xml",
-        "views/res_company.xml",
+        "views/document_layout.xml",
+        "templates/report_templates.xml",
+        "data/report_layout.xml",
     ],
     "application": False,
     "installable": True,

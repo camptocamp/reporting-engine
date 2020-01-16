@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="external_layout_images_template">
+      <div class="header">
+          <div class="row">
+              <div class="col-3 mb4">
+                  <img t-if="company.full_header_img" t-att-src="image_data_uri(company.full_header_img)" style="max-height: 60px;" alt="Logo"/>
+              </div>
+              <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/>
+          </div>
+      </div>
+
+      <div class="article o_report_layout_standard"  t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-call="web.address_layout"/>
+          <t t-raw="0"/>
+      </div>
+
+      <div class="footer o_standard_footer">
+          <div class="text-center">
+              <img t-if="company.full_footer_img" t-att-src="image_data_uri(company.full_footer_img)" style="max-width:500px;"  alt="Footer logo"/>
+
+              <div t-if="report_type == 'pdf'" class="text-muted">
+                  Page: <span class="page"/> / <span class="topage"/>
+              </div>
+          </div>
+      </div>
+    </template>
+
+
+    <!-- Same as odoo/src/odoo/addons/base/wizard/base_document_layout_views.xml -->
+    <!-- this template is used by the BaseDocumentLayout wizard to display a live preview of a dummy report -->
+    <template id="layout_preview" name="layout preview">
+        <!-- compute some layout specific variables -->
+        <t t-set="footer_color" t-value="'black'" />
+        <t t-set="table_border_color" t-value="'black'" />
+
+        <t t-set="footer_border_color" t-value="company.secondary_color" />
+
+          <div t-attf-class="page o_preview_layout o_preview_{{company.report_layout_id.name.lower()}}_layout" t-attf-style="font-family: {{company.font}};">
+            <div class="header">
+                <h2 t-attf-style="color: {{company.primary_color}}">Invoice INV/2019/0005</h2>
+                <div class="row o_layout_information">
+                    <div class="col-auto">
+                        <strong>
+                            <span t-attf-style="color: {{company.secondary_color}}">Invoice Date:</span>
+                        </strong>
+                        <p>02/05/2019</p>
+                    </div>
+                    <div class="col-auto">
+                        <strong>
+                            <span t-attf-style="color: {{company.secondary_color}}">Payment Terms:</span>
+                        </strong>
+                        <p>End of the month</p>
+                    </div>
+                    <div class="col-auto">
+                        <strong>
+                            <span t-attf-style="color: {{company.secondary_color}}">Source:</span>
+                        </strong>
+                        <p>SO022</p>
+                    </div>
+                </div>
+            </div>
+            <div class="article">
+                <table class="table table-sm" t-attf-style="border-color: {{table_border_color}}">
+                    <thead>
+                        <tr t-attf-style="color: {{company.secondary_color}}">
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>[SKU001] Server</td>
+                            <td>2.000</td>
+                            <td>190.00</td>
+                            <!-- fallback to white when browser does not support RRGGBBAA notation -->
+                            <td t-if="company.report_layout_id.name == 'Boxed'" class="o_price_total"
+                                t-attf-style="background-color: white;background-color: {{company.secondary_color}}19;">$ 380.00</td>
+                            <td t-else="" class="o_price_total">$ 380.00</td>
+                        </tr>
+                        <tr>
+                            <td>[SKU002] Computer</td>
+                            <td>1.000</td>
+                            <td>1250.00</td>
+                            <!-- fallback to white when browser does not support RRGGBBAA notation -->
+                            <td t-if="company.report_layout_id.name == 'Boxed'" class="o_price_total"
+                                t-attf-style="background-color: white;background-color: {{company.secondary_color}}19;">$ 1250.00</td>
+                            <td t-else="" class="o_price_total">$ 1250.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clearfix">
+                    <div class="row">
+                        <div t-attf-class="col-5 ml-auto">
+                            <table class="table table-sm"  t-attf-style="border-color: {{table_border_color}}">
+                                <tr class="o_subtotal">
+                                    <td>
+                                        <strong t-if="company.report_layout_id.name == 'Clean'" t-attf-style="color: {{company.secondary_color}}">Subtotal</strong>
+                                        <strong t-else="" t-attf-style="color: {{company.primary_color}}">Subtotal</strong>
+                                    </td>
+                                    <td>
+                                        <span>$ 1630.00</span>
+                                    </td>
+                                </tr>
+                                <tr class="o_total">
+                                    <t t-if="company.report_layout_id.name == 'Boxed'">
+                                        <!-- fallback to primary color when browser does not support RRGGBBAA notation -->
+                                        <td t-attf-style="background-color: {{company.primary_color}};background-color: {{company.primary_color}}D0;">
+                                            <strong>Total</strong>
+                                        </td>
+                                        <td t-attf-style="background-color: {{company.primary_color}};background-color: {{company.primary_color}}D0;">
+                                            <span>$ 1630.00</span>
+                                        </td>
+                                    </t>
+                                    <t t-else="">
+                                        <td>
+                                            <strong t-if="company.report_layout_id.name == 'Clean'" t-attf-style="color: {{company.secondary_color}}">Total</strong>
+                                            <strong t-else="" t-attf-style="color: {{company.primary_color}}">Total</strong>
+                                        </td>
+                                        <td>
+                                            <span>$ 1630.00</span>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+          </div>
+
+    </template>
+</odoo>

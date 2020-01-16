@@ -28,8 +28,6 @@ Report layout configuration
 This module provides new report template.
 With possibility to add image to replace header and footer.
 
-Now you can't configure your document layout but that can be added later
-
 **Table of contents**
 
 .. contents::
@@ -38,10 +36,10 @@ Now you can't configure your document layout but that can be added later
 Usage
 =====
 
-* In Setting/User & companies/Companies
-    * Set in company setting the `Full header image` + `Full footer image`
 * In Setting/General Setting/Business Documents:
-    * Choose Document Layout = `external_layout_images`
+    * Click on Configure Document Layout
+    * On the wizard choose Layout images
+    * Set the `Full header image` + `Full footer image`
 
 Bug Tracker
 ===========
