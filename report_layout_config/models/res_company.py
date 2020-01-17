@@ -3,16 +3,17 @@
 
 from odoo import fields, models
 
+
 class ResCompany(models.Model):
     _inherit = "res.company"
 
     full_header_img = fields.Binary(
         string="Full header image",
         help="This image will replace all header.",
-        attachment=True
+        attachment=True,
     )
     full_footer_img = fields.Binary(
         string="Full footer image",
         help="This image will replace all footer.",
-        attachment=True
+        attachment=True,
     )
