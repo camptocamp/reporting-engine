@@ -3,7 +3,7 @@
 
 {
     "name": "Report layout configuration",
-    "summary": "Add possibility to easely modify the global report layout",
+    "summary": "Add possibility to easily modify the global report layout",
     "version": "13.0.1.0.0",
     "category": "Reporting",
     "website": "http://github.com/OCA/reporting-engine",

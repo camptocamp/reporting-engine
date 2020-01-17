@@ -20,26 +20,26 @@ class BaseDocumentLayout(models.TransientModel):
 
     @api.depends('report_layout_id')
     def _compute_need_images_layout(self):
-        img_lay_id = self.env.ref(
+        self.ensure_one()
+        img_lay = self.env.ref(
             'report_layout_config.external_layout_images_template'
-        ).id
-        for wizard in self:
-            wizard.need_images_layout = False
-            if wizard.external_report_layout_id.id == img_lay_id:
-                wizard.need_images_layout = True
+        )
+        self.need_images_layout = (
+            self.external_report_layout_id == img_lay_id
+        )
 
     @api.depends('report_layout_id', 'logo', 'font', 'primary_color', 'secondary_color', 'full_footer_img', 'full_header_img')
     def _compute_preview(self):
+        self.ensure_one()
         img_lay_id = self.env.ref(
             'report_layout_config.external_layout_images_template'
         ).id
-        for wizard in self:
-            if not wizard.report_layout_id:
-                wizard.preview = False
-            elif wizard.external_report_layout_id.id != img_lay_id:
-                super()._compute_preview()
-            else:
-                ir_qweb = wizard.env['ir.qweb']
-                qweb_ctx = self.env['ir.ui.view']._prepare_qcontext()
-                qweb_ctx.update({'company': wizard})
-                wizard.preview = ir_qweb.render('report_layout_config.layout_preview', qweb_ctx)
+        if not self.report_layout_id:
+            self.preview = False
+        elif self.external_report_layout_id != img_lay:
+            super()._compute_preview()
+        else:
+            ir_qweb = self.env['ir.qweb']
+            qweb_ctx = self.env['ir.ui.view']._prepare_qcontext()
+            qweb_ctx.update({'company': wizard})
+            self.preview = ir_qweb.render('report_layout_config.layout_preview', qweb_ctx)
