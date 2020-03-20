@@ -21,7 +21,7 @@ class BaseDocumentLayout(models.TransientModel):
     @api.depends("report_layout_id")
     def _compute_need_images_layout(self):
         self.ensure_one()
-        img_lay = self.env.ref("report_layout_config.external_layout_images_template")
+        img_lay = self.env.ref("report_layout_config.external_layout_images").view_id
         self.need_images_layout = self.external_report_layout_id == img_lay
 
     @api.depends(
@@ -35,12 +35,7 @@ class BaseDocumentLayout(models.TransientModel):
     )
     def _compute_preview(self):
         self.ensure_one()
-        img_lay_id = self.env.ref(
-            "report_layout_config.external_layout_images_template"
-        ).id
-        if not self.report_layout_id:
-            self.preview = False
-        elif self.external_report_layout_id != img_lay_id:
+        if not self.need_images_layout or not self.report_layout_id:
             super()._compute_preview()
         else:
             ir_qweb = self.env["ir.qweb"]
