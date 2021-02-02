@@ -3,5 +3,7 @@ lxml
 py3o.formats
 py3o.template
 PyPDF2
+py3o.formats
+py3o.template
 xlrd
 xlsxwriter
