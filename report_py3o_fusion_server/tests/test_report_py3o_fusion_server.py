@@ -20,7 +20,7 @@ from odoo.addons.report_py3o.tests import test_report_py3o
 )
 class TestReportPy3oFusionServer(test_report_py3o.TestReportPy3o):
     def setUp(self):
-        super(TestReportPy3oFusionServer, self).setUp()
+        super().setUp()
         py3o_server = self.env["py3o.server"].create({"url": "http://dummy"})
         # check the call to the fusion server
         self.report.write({"py3o_server_id": py3o_server.id, "py3o_filetype": "pdf"})
