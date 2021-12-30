@@ -23,5 +23,5 @@
         >/report_layout_config/static/img/preview_standard.png</field>
         <field name="pdf">/report_layout_config/static/pdf/preview_standard.pdf</field>
     </record>
-    
+
 </odoo>

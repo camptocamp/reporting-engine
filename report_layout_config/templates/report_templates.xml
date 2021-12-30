@@ -83,7 +83,7 @@
     <template id="styles_company_report" inherit_id="web.styles_company_report">
         <xpath expr="//t[contains(@t-if, 'layout')]" position="after">
             <!-- next part is the same as in web/views/report_templates web.external_layout_standard -->
-            <t 
+            <t
                 t-elif="layout == 'report_layout_config.external_standart_layout_images_template'"
             >
             &amp;.o_report_layout_standard {
@@ -104,9 +104,9 @@
             }
         </t>
         <!-- next part is the same as in web/views/report_templates web.external_layout_clean -->
-        <t 
-            t-elif="layout == 'report_layout_config.external_clean_layout_images_template'"
-        >
+        <t
+                t-elif="layout == 'report_layout_config.external_clean_layout_images_template'"
+            >
             &amp;.o_clean_footer {
                     border-top: 3px solid <t t-esc='secondary' />;
                     h4 {
@@ -128,7 +128,9 @@
                        thead {
                            color: <t t-esc='secondary' />;
                            tr th {
-                                border-top: 3px solid <t t-esc='secondary' /> !important;
+                                border-top: 3px solid <t
+                    t-esc='secondary'
+                /> !important;
                             }
                         }
                         tbody {

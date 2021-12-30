@@ -8,11 +8,13 @@ class BaseDocumentLayout(models.TransientModel):
     _inherit = "base.document.layout"
 
     full_header_img = fields.Binary(
-        related="company_id.full_header_img", readonly=False,
+        related="company_id.full_header_img",
+        readonly=False,
         help="Replaces whole header with image",
     )
     full_footer_img = fields.Binary(
-        related="company_id.full_footer_img", readonly=False,
+        related="company_id.full_footer_img",
+        readonly=False,
         help="Replaces whole footer, disables footer logo",
     )
 
