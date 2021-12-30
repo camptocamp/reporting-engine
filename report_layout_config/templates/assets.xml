@@ -3,7 +3,11 @@
 
     <template id="report_assets_common" inherit_id="web.report_assets_common">
         <xpath expr="." position="inside">
-            <link href="/report_layout_config/static/src/scss/style.scss" rel="stylesheet" type="text/scss"/>
+            <link 
+                href="/report_layout_config/static/src/scss/style.scss"
+                rel="stylesheet"
+                type="text/scss"
+            />
         </xpath>
     </template>
 
