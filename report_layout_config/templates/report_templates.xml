@@ -49,20 +49,18 @@
         <xpath expr="//div[contains(@t-attf-class, 'header')]" position="replace">
             <div class="header">
                 <div class="row">
-                    <div class="col-3 mb4">
-                        <img
-                            t-if="company.full_header_img"
-                            t-att-src="image_data_uri(company.full_header_img)"
-                            class="header-full-image"
-                            alt="Logo"
-                        />
+                    <img
+                        t-if="company.full_header_img"
+                        t-att-src="image_data_uri(company.full_header_img)"
+                        class="header-full-image"
+                        alt="Logo"
+                    />
                     </div>
                     <div
                         class="col-9 text-right header-image"
                         t-field="company.report_header"
                         name="report_header"
                     />
-                </div>
             </div>
         </xpath>
         <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="replace">
