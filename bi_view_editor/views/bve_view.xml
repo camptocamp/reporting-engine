@@ -50,15 +50,6 @@
                     />
                 </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <button
-                            name="action_translations"
-                            type="object"
-                            states="created"
-                            icon="fa-globe"
-                            string="Translations"
-                        />
-                    </div>
                     <h1>
                         <field
                             name="name"
@@ -68,85 +59,71 @@
                     </h1>
                     <notebook>
                         <page string="Query Builder">
-                            <group>
-                                <field
-                                    name="data"
-                                    widget="BVEEditor"
-                                    nolabel="1"
-                                    attrs="{'readonly': [('state','=','created')]}"
-                                />
-                            </group>
+                            <field
+                                name="data"
+                                widget="BVEEditor"
+                                nolabel="1"
+                                attrs="{'readonly': [('state','=','created')]}"
+                            />
                         </page>
                         <page
                             string="ER Diagram"
                             attrs="{'invisible': [('er_diagram_image','=',False)]}"
                         >
-                            <group>
-                                <field
-                                    nolabel="1"
-                                    name="er_diagram_image"
-                                    widget="image"
-                                />
-                            </group>
+                            <field nolabel="1" name="er_diagram_image" widget="image" />
                         </page>
                         <page string="Details">
-                            <group>
-                                <field
-                                    name="field_ids"
-                                    attrs="{'readonly': [('state','=','created')]}"
+                            <separator string="Fields" />
+                            <field
+                                name="field_ids"
+                                nolabel="1"
+                                attrs="{'readonly': [('state','=','created')]}"
+                            >
+                                <tree
+                                    editable="bottom"
+                                    decoration-muted="in_list == False"
+                                    create="false"
                                 >
-                                    <tree
-                                        editable="bottom"
-                                        decoration-muted="in_list == False"
-                                        create="false"
-                                    >
-                                        <field name="sequence" widget="handle" />
-                                        <field name="description" string="Field" />
-                                        <field name="model_id" readonly="1" />
-                                        <field name="table_alias" />
-                                        <field name="ttype" invisible="1" />
-                                        <field
-                                            name="row"
-                                            widget="toggle_button"
-                                            attrs="{'invisible': [('ttype','in',('float', 'integer', 'monetary'))]}"
-                                        />
-                                        <field
-                                            name="column"
-                                            widget="toggle_button"
-                                            attrs="{'invisible': [('ttype','in',('float', 'integer', 'monetary'))]}"
-                                        />
-                                        <field
-                                            name="measure"
-                                            widget="toggle_button"
-                                            attrs="{'invisible': [('ttype','not in',('float', 'integer', 'monetary'))]}"
-                                        />
-                                        <field name="in_list" widget="boolean_toggle" />
-                                        <field
-                                            name="list_attr"
-                                            attrs="{'invisible': ['|',('in_list','=',False),('ttype','not in',('float', 'integer'))]}"
-                                        />
-                                    </tree>
-                                </field>
-                            </group>
-                            <group>
-                                <field
-                                    name="relation_ids"
-                                    attrs="{'readonly': [('state','=','created')]}"
-                                >
-                                    <tree editable="bottom" create="false">
-                                        <field name="sequence" widget="handle" />
-                                        <field name="description" string="Field" />
-                                        <field name="model_id" readonly="1" />
-                                        <field name="table_alias" />
-                                        <field name="join_model_id" readonly="1" />
-                                        <field name="join_node" />
-                                        <field
-                                            name="left_join"
-                                            widget="toggle_button"
-                                        />
-                                    </tree>
-                                </field>
-                            </group>
+                                    <field name="sequence" widget="handle" />
+                                    <field name="description" string="Field" />
+                                    <field name="model_id" readonly="1" />
+                                    <field name="table_alias" />
+                                    <field name="ttype" invisible="1" />
+                                    <field
+                                        name="row"
+                                        attrs="{'invisible': [('ttype','in',('float', 'integer', 'monetary'))]}"
+                                    />
+                                    <field
+                                        name="column"
+                                        attrs="{'invisible': [('ttype','in',('float', 'integer', 'monetary'))]}"
+                                    />
+                                    <field
+                                        name="measure"
+                                        attrs="{'invisible': [('ttype','not in',('float', 'integer', 'monetary'))]}"
+                                    />
+                                    <field name="in_list" widget="boolean_toggle" />
+                                    <field
+                                        name="list_attr"
+                                        attrs="{'invisible': ['|',('in_list','=',False),('ttype','not in',('float', 'integer'))]}"
+                                    />
+                                </tree>
+                            </field>
+                            <separator string="Relations" />
+                            <field
+                                name="relation_ids"
+                                nolabel="1"
+                                attrs="{'readonly': [('state','=','created')]}"
+                            >
+                                <tree editable="bottom" create="false">
+                                    <field name="sequence" widget="handle" />
+                                    <field name="description" string="Field" />
+                                    <field name="model_id" readonly="1" />
+                                    <field name="table_alias" />
+                                    <field name="join_model_id" readonly="1" />
+                                    <field name="join_node" />
+                                    <field name="left_join" />
+                                </tree>
+                            </field>
                         </page>
                         <page string="SQL" groups="base.group_no_one">
                             <field name="query" />

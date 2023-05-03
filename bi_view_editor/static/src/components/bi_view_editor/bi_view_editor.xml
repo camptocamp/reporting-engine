@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates xml:space="preserve">
+    <!-- BiViewEditor -->
+    <t t-name="bi_view_editor.Frame" owl="1">
+        <div class="oe_form_field_bi_editor">
+            <div class="body">
+                <div class="left">
+                    <ModelList
+                        models="state.models"
+                        fieldClicked.bind="fieldClicked"
+                        readonly="props.readonly"
+                    />
+                </div>
+                <div class="right" t-on-dragover="onDragOver" t-on-drop="onDrop">
+                    <FieldList
+                        register.bind="registerFieldList"
+                        fieldDeleted.bind="fieldDeleted"
+                        fieldUpdated.bind="fieldUpdated"
+                        readonly="props.readonly"
+                    />
+                </div>
+                <div class="clear" />
+            </div>
+            <div class="footer">
+                <div class="left" />
+                <div class="right">
+                    <button
+                        t-if="!props.readonly"
+                        class="btn btn-secondary"
+                        t-on-click="clear"
+                    >
+                        <span class="fa fa-eraser" />
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+    <!-- JoinNodeDialog -->
+    <t t-name="bi_view_editor.JoinNodeDialog" owl="1">
+        <Dialog title="title">
+            <div class="oe_bi_view_editor_join_node_dialog">
+                <ul class="list-group">
+                    <t t-foreach="choices" t-as="choice" t-key="choice.index">
+                        <t t-if="choice.join_node !== -1 and choice.table_alias !== -1">
+                            <li
+                                class="list-group-item list-group-item-action text-primary"
+                                t-on-click="() => this.choiceClicked(choice)"
+                            >
+                                <b>Use the existing node</b>
+                            </li>
+                        </t>
+                        <t t-elif="choice.join_node !== -1">
+                            <li
+                                class="list-group-item list-group-item-action text-success"
+                                t-on-click="() => this.choiceClicked(choice)"
+                            >
+                                Use the field
+                                <b>
+                                    <t t-out="choice.model_name" />
+                                <!-- spaces around the icon are needed -->
+                                </b> <i class="fa fa-caret-right" /> <b>
+                                    <t t-out="choice.description" />
+                                </b>
+                                <span class="badge">new</span>
+                            </li>
+                        </t>
+                        <t t-else="">
+                            <li
+                                class="list-group-item list-group-item-action"
+                                t-on-click="() => this.choiceClicked(choice)"
+                            >
+                                Use the field
+                                <b>
+                                    <t t-out="choice.model_name" />
+                                <!-- spaces around the icon are needed -->
+                                </b> <i class="fa fa-caret-right" /> <b>
+                                    <t t-out="choice.description" />
+                                </b>
+                            </li>
+                        </t>
+                    </t>
+                </ul>
+            </div>
+            <t t-set-slot="footer" owl="1">
+                <button class="btn btn-secondary" t-on-click="props.close">
+                    <t>Cancel</t>
+                </button>
+            </t>
+        </Dialog>
+    </t>
+    <!-- ModelList -->
+    <t t-name="bi_view_editor.ModelList" owl="1">
+        <div>
+            <div class="search-bar">
+                <span class="fa fa-search" />
+                <input
+                    type="text"
+                    class="search-bar"
+                    t-att-disabled="props.readonly"
+                    t-on-keyup="filterChanged"
+                />
+            </div>
+            <div class="class-list" t-att-class="{readonly: props.readonly}">
+                <t t-foreach="props.models" t-as="model" t-key="model.id">
+                    <ModelListItem
+                        model="model"
+                        filter="state.filter"
+                        fieldClicked.bind="props.fieldClicked"
+                        readonly="props.readonly"
+                    />
+                </t>
+            </div>
+        </div>
+    </t>
+    <!-- ModelListItem -->
+    <t t-name="bi_view_editor.ModelListItem" owl="1">
+        <div t-if="matchesFilter" class="class-container">
+            <div
+                class="class"
+                t-att-class="{readonly: props.readonly}"
+                t-att-title="props.model.model"
+                t-on-click="clicked"
+            >
+                <t t-out="props.model.name" />
+            </div>
+            <t t-if="expanded">
+                <t t-foreach="state.fields" t-as="field" t-key="field.name">
+                    <ModelListFieldItem
+                        field="field"
+                        fieldClicked.bind="props.fieldClicked"
+                        readonly="props.readonly"
+                    />
+                </t>
+            </t>
+        </div>
+    </t>
+    <!-- ModelListFieldItem-->
+    <t t-name="bi_view_editor.ModelListFieldItem" owl="1">
+        <div
+            class="field"
+            t-att-title="props.field.name"
+            t-on-click="clicked"
+            draggable="true"
+            t-on-dragstart="onDragStart"
+        >
+            <t t-out="props.field.description" />
+        </div>
+    </t>
+    <!-- FieldList -->
+    <t t-name="bi_view_editor.FieldList" owl="1">
+        <div>
+            <table class="field-list">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Model</th>
+                        <th>Options</th>
+                        <th />
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="state.fields" t-as="field" t-key="field._id">
+                        <t t-if="field.join_node">
+                            <JoinListItem
+                                field="field"
+                                readonly="props.readonly"
+                                t-on-contextmenu="(e) => this.openContextMenu('join', field, e)"
+                            />
+                        </t>
+                        <t t-else="">
+                            <FieldListItem
+                                field="field"
+                                delete.bind="deleteField"
+                                setDescription.bind="setFieldDescription"
+                                readonly="props.readonly"
+                                t-on-contextmenu="(e) => this.openContextMenu('field', field, e)"
+                            />
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+        <FieldListFieldContextMenu
+            t-if="state.contextMenuOpen === 'field'"
+            field="state.contextMenuField"
+            position="state.contextMenuPosition"
+            close.bind="closeContextMenu"
+            onChange.bind="setFieldProperty"
+        />
+        <FieldListJoinContextMenu
+            t-if="state.contextMenuOpen === 'join'"
+            field="state.contextMenuField"
+            position="state.contextMenuPosition"
+            close.bind="closeContextMenu"
+            onChange.bind="setFieldProperty"
+        />
+    </t>
+    <!-- FieldContextMenu -->
+    <t t-name="bi_view_editor.FieldList.FieldContextMenu" owl="1">
+        <ul t-ref="main" class="context-menu" t-on-mouseleave="close">
+            <li>
+                <div class="checkbox">
+                    <label>
+                        <input
+                            type="checkbox"
+                            t-att-checked="props.field.column"
+                            t-att-disabled="measurable"
+                            t-on-change="(e) => this.onChange('column', e)"
+                        />
+                        <span>Column</span>
+                    </label>
+                </div>
+            </li>
+            <li>
+                <div class="checkbox">
+                    <label>
+                        <input
+                            type="checkbox"
+                            t-att-checked="props.field.row"
+                            t-att-disabled="measurable"
+                            t-on-change="(e) => this.onChange('row', e)"
+                        />
+                        <span>Row</span>
+                    </label>
+                </div>
+            </li>
+            <li>
+                <div class="checkbox">
+                    <label>
+                        <input
+                            type="checkbox"
+                            t-att-checked="props.field.measure"
+                            t-att-disabled="!measurable"
+                            t-on-change="(e) => this.onChange('measure', e)"
+                        />
+                        <span>Measure</span>
+                    </label>
+                </div>
+            </li>
+            <li>
+                <div class="checkbox">
+                    <label>
+                        <input
+                            type="checkbox"
+                            t-att-checked="props.field.list"
+                            t-on-change="(e) => this.onChange('list', e)"
+                        />
+                        <span>List</span>
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </t>
+    <!-- JoinContextMenu -->
+    <t t-name="bi_view_editor.FieldList.JoinContextMenu" owl="1">
+        <ul t-ref="main" class="context-menu" t-on-mouseleave="close">
+            <li>
+                <div class="checkbox">
+                    <label>
+                        <input
+                            type="checkbox"
+                            t-att-checked="props.field.join_left"
+                            t-on-change="(e) => this.onChange('join_left', e)"
+                        />
+                        Join Left
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </t>
+    <!-- FieldListItem -->
+    <t t-name="bi_view_editor.FieldListItem" owl="1">
+        <tr class="field-node" t-att-class="{readonly: props.readonly}">
+            <td>
+                <input
+                    t-attf-title="#{field.model_name} (#{field.model})"
+                    class="form-control input-sm"
+                    type="text"
+                    name="description"
+                    t-att-value="field.description"
+                    t-att-disabled="props.readonly"
+                    t-on-input="descriptionChanged"
+                />
+            </td>
+            <td>
+                <t t-out="field.model_name" />
+            </td>
+            <td>
+                <!-- a space is needed to separate the icons -->
+                <span t-if="field.column" class="fa fa-columns" title="Column" /> <span
+                    t-if="field.row"
+                    class="fa fa-bars"
+                    title="Row"
+                /> <span
+                    t-if="field.measure"
+                    class="fa fa-bar-chart-o"
+                    title="Measure"
+                /> <span t-if="field.list" class="fa fa-list" title="List" />
+            </td>
+            <td>
+                <button
+                    t-if="!props.readonly"
+                    class="delete-button fa fa-trash-o"
+                    t-on-click="delete"
+                />
+            </td>
+        </tr>
+    </t>
+    <!-- JoinListItem -->
+    <t t-name="bi_view_editor.JoinListItem" owl="1">
+        <tr class="join-node">
+            <td colspan="4">
+                <t t-if="field.join_node > field.table_alias">
+                    <b>
+                        <t t-out="field.model_name" />
+                    <!-- spaces around the icon are needed -->
+                    </b> <i class="fa fa-caret-right" /> <small>
+                        <t t-out="field.description" />
+                    </small>
+                </t>
+                <t t-else="">
+                    <small>
+                        <t t-out="field.description" />
+                    <!-- spaces around the icon are needed -->
+                    </small> <i class="fa fa-caret-left" /> <b>
+                        <t t-out="field.model_name" />
+                    </b>
+                </t>
+                <span t-if="field.join_left">
+                    <i>(join left)</i>
+                </span>
+            </td>
+        </tr>
+    </t>
+</templates>
