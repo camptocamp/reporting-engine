@@ -110,6 +110,7 @@ class BveViewLine(models.Model):
                 "size": field.size,
                 "state": "manual",
                 "readonly": True,
+                "translate": field.translate,
                 "groups": [(6, 0, field.groups.ids)],
             }
             if vals["ttype"] == "monetary":
