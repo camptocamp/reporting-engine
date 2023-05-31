@@ -11,7 +11,9 @@
     "category": "Productivity",
     "version": "16.0.1.0.0",
     "development_status": "Beta",
-    "depends": ["web"],
+    "depends": [
+        "spreadsheet_dashboard",
+    ],
     "external_dependencies": {
         "deb": ["graphviz"],
     },
