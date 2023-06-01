@@ -16,6 +16,14 @@ export class BiViewEditor extends Component {
         this.state = useState({
             models: [],
             fields: [],
+            // This allows to access fields by their _id property in an
+            // efficient way. Since the fields array length is normally quite
+            // small, it would also be possible to use
+            // fields.find(element => element._id == field._id), but that
+            // would mean that this function would be defined in 3 places
+            // (deleteField(), setFieldProperty() and
+            // FieldList.setFieldProperty()), and using a common function
+            // would be quite similar to using this object.
             fieldsByID: {},
         });
         this.orm = useService("orm");
