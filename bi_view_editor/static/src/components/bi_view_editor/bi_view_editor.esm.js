@@ -15,37 +15,97 @@ export class BiViewEditor extends Component {
     setup() {
         this.state = useState({
             models: [],
+            fields: [],
+            fieldsByID: {},
         });
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
         onWillUpdateProps((nextProps) => {
-            this.updateFieldList(nextProps.value);
+            this.updateFields(nextProps.value);
         });
-        this.field_list = null;
+        this.updateFields(this.props.value);
     }
-    updateFieldList(value) {
+    get modelIDs() {
+        const model_ids = {};
+        for (const field of this.state.fields) {
+            model_ids[field.table_alias] = field.model_id;
+        }
+        return model_ids;
+    }
+    get modelData() {
+        const model_data = {};
+        for (const field of this.state.fields) {
+            model_data[field.table_alias] = {
+                model_id: field.model_id,
+                model_name: field.model_name,
+            };
+        }
+        return model_data;
+    }
+    _addField(field) {
+        field.row = typeof field.row === "undefined" ? false : field.row;
+        field.column = typeof field.column === "undefined" ? false : field.column;
+        field.measure = typeof field.measure === "undefined" ? false : field.measure;
+        field.list = typeof field.list === "undefined" ? true : field.list;
+        field._id = typeof field._id === "undefined" ? _.uniqueId("node_") : field._id;
+        if (field.join_node) {
+            field.join_left =
+                typeof field.join_left === "undefined" ? false : field.join_left;
+        }
+
+        let i = 0;
+        const name = field.name;
+        while (
+            this.state.fields.filter(function (item) {
+                return item.name === field.name;
+            }).length > 0
+        ) {
+            field.name = name + "_" + i;
+            i++;
+        }
+        this.state.fields.push(field);
+        this.state.fieldsByID[field._id] = field;
+    }
+    deleteField(field) {
+        this.state.fields.splice(
+            this.state.fields.findIndex((element) => {
+                return element._id === field._id;
+            }),
+            1
+        );
+        delete this.state.fieldsByID[field._id];
+        this.fieldDeleted();
+    }
+    setFieldProperty(field, property, value) {
+        this.state.fieldsByID[field._id][property] = value;
+        this.fieldUpdated();
+    }
+    setFields(fields) {
+        this.state.fields = [];
+        this.state.fieldsByID = {};
+        for (const field of fields) {
+            this._addField(field);
+        }
+    }
+    updateFields(value) {
         if (value) {
-            this.field_list.set(JSON.parse(value));
+            this.setFields(JSON.parse(value));
         }
         this.updateModels();
     }
     updateModels() {
-        const model_ids = this.field_list.modelIDs;
+        const model_ids = this.modelIDs;
         this.orm
             .call("ir.model", "get_models", model_ids ? [model_ids] : [])
             .then((models) => {
                 this.state.models = models;
             });
     }
-    registerFieldList(fieldList) {
-        this.field_list = fieldList;
-        this.updateFieldList(this.props.value);
-    }
     clear() {
         if (this.props.readonly) {
             return;
         }
-        this.field_list.set([]);
+        this.setFields([]);
         this.updateValue();
     }
     fieldUpdated() {
@@ -53,15 +113,15 @@ export class BiViewEditor extends Component {
     }
     fieldDeleted() {
         this.orm
-            .call("bve.view", "get_clean_list", [this.field_list.get()])
+            .call("bve.view", "get_clean_list", [this.state.fields])
             .then((result) => {
-                this.updateFieldList(result);
+                this.updateFields(result);
                 this.updateValue();
             });
     }
     getTableAlias(field) {
         if (typeof field.table_alias === "undefined") {
-            const model_ids = this.field_list.modelIDs;
+            const model_ids = this.modelIDs;
             let n = 1;
             while (typeof model_ids["t" + n] !== "undefined") {
                 n++;
@@ -78,17 +138,17 @@ export class BiViewEditor extends Component {
             } else {
                 join_node.table_alias = field.table_alias;
             }
-            this.field_list.add(join_node);
+            this._addField(join_node);
         } else {
             field.table_alias = join_node.table_alias;
         }
 
-        this.field_list.add(field);
+        this._addField(field);
         this.updateValue();
     }
     addField(field) {
         const data = _.extend({}, field);
-        const field_data = this.field_list.get();
+        const field_data = this.state.fields;
         this.orm
             .call("ir.model", "get_join_nodes", [field_data, data])
             .then((result) => {
@@ -97,14 +157,14 @@ export class BiViewEditor extends Component {
                 } else if (result.length > 1) {
                     this.dialogService.add(JoinNodeDialog, {
                         choices: result,
-                        model_data: this.field_list.modelData,
+                        model_data: this.modelData,
                         choiceSelected: (choice) => {
                             this.addFieldAndJoinNode(data, choice);
                         },
                     });
                 } else {
                     data.table_alias = this.getTableAlias(data);
-                    this.field_list.add(data);
+                    this._addField(data);
                     this.updateValue();
                 }
             });
@@ -133,7 +193,7 @@ export class BiViewEditor extends Component {
         }
     }
     updateValue() {
-        this.props.update(JSON.stringify(this.field_list.get()));
+        this.props.update(JSON.stringify(this.state.fields));
         this.updateModels();
     }
 }

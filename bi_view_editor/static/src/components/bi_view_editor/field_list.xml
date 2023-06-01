@@ -13,7 +13,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="state.fields" t-as="field" t-key="field._id">
+                    <t t-foreach="props.fields" t-as="field" t-key="field._id">
                         <t t-if="field.join_node">
                             <JoinListItem
                                 field="field"
@@ -24,7 +24,7 @@
                         <t t-else="">
                             <FieldListItem
                                 field="field"
-                                delete.bind="deleteField"
+                                delete.bind="props.deleteField"
                                 setDescription.bind="setFieldDescription"
                                 readonly="props.readonly"
                                 t-on-contextmenu="(e) => this.openContextMenu('field', field, e)"

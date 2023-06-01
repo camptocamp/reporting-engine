@@ -12,9 +12,10 @@
                 </div>
                 <div class="right" t-on-dragover="onDragOver" t-on-drop="onDrop">
                     <FieldList
-                        register.bind="registerFieldList"
-                        fieldDeleted.bind="fieldDeleted"
-                        fieldUpdated.bind="fieldUpdated"
+                        fields="state.fields"
+                        fieldsByID="state.fieldsByID"
+                        deleteField.bind="deleteField"
+                        setFieldProperty.bind="setFieldProperty"
                         readonly="props.readonly"
                     />
                 </div>
