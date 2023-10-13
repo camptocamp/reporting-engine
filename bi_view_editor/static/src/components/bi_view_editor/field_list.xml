@@ -127,29 +127,29 @@
         <tr class="field-node" t-att-class="{readonly: props.readonly}">
             <td>
                 <input
-                    t-attf-title="#{field.model_name} (#{field.model})"
+                    t-attf-title="#{props.field.model_name} (#{props.field.model})"
                     class="form-control input-sm"
                     type="text"
                     name="description"
-                    t-att-value="field.description"
+                    t-att-value="props.field.description"
                     t-att-disabled="props.readonly"
                     t-on-input="descriptionChanged"
                 />
             </td>
             <td>
-                <t t-out="field.model_name" />
+                <t t-out="props.field.model_name" />
             </td>
             <td>
                 <!-- a space is needed to separate the icons -->
-                <span t-if="field.column" class="fa fa-columns" title="Column" /> <span
-                    t-if="field.row"
-                    class="fa fa-bars"
-                    title="Row"
-                /> <span
-                    t-if="field.measure"
+                <span
+                    t-if="props.field.column"
+                    class="fa fa-columns"
+                    title="Column"
+                /> <span t-if="props.field.row" class="fa fa-bars" title="Row" /> <span
+                    t-if="props.field.measure"
                     class="fa fa-bar-chart-o"
                     title="Measure"
-                /> <span t-if="field.list" class="fa fa-list" title="List" />
+                /> <span t-if="props.field.list" class="fa fa-list" title="List" />
             </td>
             <td>
                 <button
@@ -164,23 +164,23 @@
     <t t-name="bi_view_editor.JoinListItem" owl="1">
         <tr class="join-node">
             <td colspan="4">
-                <t t-if="field.join_node > field.table_alias">
+                <t t-if="props.field.join_node > props.field.table_alias">
                     <b>
-                        <t t-out="field.model_name" />
+                        <t t-out="props.field.model_name" />
                     <!-- spaces around the icon are needed -->
                     </b> <i class="fa fa-caret-right" /> <small>
-                        <t t-out="field.description" />
+                        <t t-out="props.field.description" />
                     </small>
                 </t>
                 <t t-else="">
                     <small>
-                        <t t-out="field.description" />
+                        <t t-out="props.field.description" />
                     <!-- spaces around the icon are needed -->
                     </small> <i class="fa fa-caret-left" /> <b>
-                        <t t-out="field.model_name" />
+                        <t t-out="props.field.model_name" />
                     </b>
                 </t>
-                <span t-if="field.join_left">
+                <span t-if="props.field.join_left">
                     <i>(join left)</i>
                 </span>
             </td>

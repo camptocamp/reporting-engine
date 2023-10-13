@@ -6,11 +6,6 @@
 import {Component, onMounted, useRef, useState} from "@odoo/owl";
 
 class FieldListItem extends Component {
-    // This is only to simplify the template (using field instead of
-    // props.field).
-    get field() {
-        return this.props.field;
-    }
     delete() {
         this.props.delete(this.props.field);
     }
@@ -26,13 +21,7 @@ FieldListItem.props = {
     readonly: Boolean,
 };
 
-class JoinListItem extends Component {
-    // This is only to simplify the template (using field instead of
-    // props.field).
-    get field() {
-        return this.props.field;
-    }
-}
+class JoinListItem extends Component {}
 JoinListItem.template = "bi_view_editor.JoinListItem";
 JoinListItem.props = {
     field: Object,
