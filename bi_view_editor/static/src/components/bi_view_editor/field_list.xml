@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates xml:space="preserve">
-    <!-- FieldList -->
     <t t-name="bi_view_editor.FieldList" owl="1">
         <div>
             <table class="field-list">
@@ -49,7 +48,7 @@
             onChange.bind="setFieldProperty"
         />
     </t>
-    <!-- FieldContextMenu -->
+
     <t t-name="bi_view_editor.FieldList.FieldContextMenu" owl="1">
         <ul t-ref="main" class="context-menu" t-on-mouseleave="close">
             <li>
@@ -105,7 +104,7 @@
             </li>
         </ul>
     </t>
-    <!-- JoinContextMenu -->
+
     <t t-name="bi_view_editor.FieldList.JoinContextMenu" owl="1">
         <ul t-ref="main" class="context-menu" t-on-mouseleave="close">
             <li>
@@ -122,7 +121,7 @@
             </li>
         </ul>
     </t>
-    <!-- FieldListItem -->
+
     <t t-name="bi_view_editor.FieldListItem" owl="1">
         <tr class="field-node" t-att-class="{readonly: props.readonly}">
             <td>
@@ -160,7 +159,7 @@
             </td>
         </tr>
     </t>
-    <!-- JoinListItem -->
+
     <t t-name="bi_view_editor.JoinListItem" owl="1">
         <tr class="join-node">
             <td colspan="4">

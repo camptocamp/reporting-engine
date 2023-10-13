@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates xml:space="preserve">
-    <!-- ModelList -->
     <t t-name="bi_view_editor.ModelList" owl="1">
         <div>
             <div class="search-bar">
@@ -24,7 +23,7 @@
             </div>
         </div>
     </t>
-    <!-- ModelListItem -->
+
     <t t-name="bi_view_editor.ModelListItem" owl="1">
         <div t-if="matchesFilter" class="class-container">
             <div
@@ -46,7 +45,7 @@
             </t>
         </div>
     </t>
-    <!-- ModelListFieldItem-->
+
     <t t-name="bi_view_editor.ModelListFieldItem" owl="1">
         <div
             class="field"

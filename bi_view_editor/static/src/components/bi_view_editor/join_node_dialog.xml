@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates xml:space="preserve">
-    <!-- JoinNodeDialog -->
     <t t-name="bi_view_editor.JoinNodeDialog" owl="1">
         <Dialog title="title">
             <div class="oe_bi_view_editor_join_node_dialog">
