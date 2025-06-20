@@ -122,12 +122,13 @@ class BiSQLView(models.Model):
 
     @api.model
     def _default_parent_menu_id(self):
-        return self.env.ref("bi_sql_editor.menu_bi_sql_editor")
+        return self.env.ref(
+            "bi_sql_editor.menu_bi_sql_editor", raise_if_not_found=False
+        )
 
     parent_menu_id = fields.Many2one(
         string="Parent Odoo Menu",
         comodel_name="ir.ui.menu",
-        required=True,
         default=lambda self: self._default_parent_menu_id(),
         help="By assigning a value to this field before manually creating the "
         "UI, you're overwriting the parent menu on which the menu related to "

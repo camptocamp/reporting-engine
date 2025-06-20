@@ -218,6 +218,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                                         <field
                                     name="parent_menu_id"
                                     readonly="state == 'ui_valid'"
+                                    required="True"
                                 />
                                     </group>
                                     <group string="UI Instances">
