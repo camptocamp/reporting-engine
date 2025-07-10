@@ -71,7 +71,7 @@ Authors
 Contributors
 ------------
 
--  Akim Juillerat akim.juillerat@camptocamp.com
+- Akim Juillerat akim.juillerat@camptocamp.com
 
 Maintainers
 -----------

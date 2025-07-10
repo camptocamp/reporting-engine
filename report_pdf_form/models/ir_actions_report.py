@@ -23,9 +23,23 @@ class IrActionsReport(models.Model):
     _inherit = "ir.actions.report"
 
     def _render_qweb_pdf_prepare_streams(self, report_ref, data, res_ids=None):
-        pdf_form_report = self.env["report.pdf.form"].search(
-            [("report_name", "=", report_ref)]
-        )
+        ReportPdfFormSudo = self.env["report.pdf.form"].sudo()
+        if isinstance(report_ref, int):
+            pdf_form_report = ReportPdfFormSudo.search([("report_id", "=", report_ref)])
+        elif isinstance(report_ref, models.Model):
+            if report_ref._name != self._name:
+                raise ValueError(
+                    "Expected report of type %(expected)s, got %(report_name)s",
+                    expected=self._name,
+                    report_name=report_ref._name,
+                )
+            pdf_form_report = ReportPdfFormSudo.search(
+                [("report_id", "=", report_ref.id)]
+            )
+        else:
+            pdf_form_report = ReportPdfFormSudo.search(
+                [("report_name", "=", report_ref)]
+            )
 
         if not pdf_form_report:
             return super()._render_qweb_pdf_prepare_streams(
