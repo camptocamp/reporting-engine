@@ -3,7 +3,7 @@
 {
     "name": "Board Eval Context",
     "summary": "Add some keys to board.board eval context",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "maintainer": "gurneyalex",
     "depends": [
